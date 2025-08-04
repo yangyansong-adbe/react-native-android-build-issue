@@ -20,9 +20,20 @@ buildscript {
 
 apply plugin: "com.facebook.react.rootproject"
 
-repositories.each { repo ->
-    println "Repository Name: ${repo.name}"
-    println "Repository URL: ${repo.url}"
-    println "Repository Class: ${repo.class.simpleName}"
-    println "---"
+// Apply repository filtering to all projects (root and subprojects)
+allprojects {
+    repositories {
+        configureEach { repository ->
+            def repoUrl = repository.url.toString()
+            // Filter Sonatype snapshot repository to exclude com.adobe.marketing.mobile artifacts
+            if (repoUrl == "https://oss.sonatype.org/content/repositories/snapshots/") {
+                repository.content {
+                    excludeGroupByRegex "com\\.adobe\\.marketing\\.mobile.*"
+                }
+                println "Applied snapshot repository filter to: ${repository.name} (${repoUrl})"
+                println "  - Excluded: com.adobe.marketing.mobile.*"
+            }
+
+        }
+    }
 }
